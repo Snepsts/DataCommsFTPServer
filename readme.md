@@ -17,5 +17,8 @@ to run this before running that one.
 * The program takes an argument for the port/application number you run it on.
 	* We recommend using something around 2000x (x being 0-9).
 		* i.e. DataCommsChatServer.exe 20003
-* Now you'll want to launch the client with the same port/application number as 
+* Now you'll want to launch the client with the same port/application number as
 the server.
+* After you launch the client, you're good to receive messages!!!
+* You can exit by having the client exit and responding to the prompt with
+"yes".
