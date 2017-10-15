@@ -22,3 +22,4 @@ the server.
 * After you launch the client, you're good to receive messages!!!
 * You can exit by having the client exit and responding to the prompt with
 "yes".
+* A server log is written in C:\Public\Users\EchoServerLog.txt
