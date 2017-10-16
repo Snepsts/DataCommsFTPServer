@@ -28,6 +28,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.IO;
 
 class SimpleFTPServer
 {
@@ -43,6 +44,8 @@ class SimpleFTPServer
 		Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 		server.Bind(ipep);
 		server.Listen(10);
+
+		string path = "C:\\Users\\Public\\";
 
 		DateTime currTime = DateTime.Now;
 		string genMessage = "SimpleEchoServer log generated at: " + currTime + Environment.NewLine;
@@ -82,13 +85,27 @@ class SimpleFTPServer
 				{
 					data = new byte[1024];
 					recv = client.Receive(data);
+
 					if (recv == 0)
 						break;
-					currTime = DateTime.Now;
-					string msg = "[" + currTime + "] client: " + Encoding.ASCII.GetString(data, 0, recv);
-					Console.WriteLine(msg);
-					log.WriteLine(msg);
+
+					string name = Encoding.ASCII.GetString(data, 0, recv);
+
 					client.Send(data, recv, SocketFlags.None);
+
+					data = new byte[102400];
+					recv = client.Receive(data);
+
+					if (recv == 0)
+						break;
+
+					string file = path + name;
+					FileStream download = new FileStream(file, FileMode.Create);
+
+					Console.WriteLine("Receiving file...");
+					download.Write(data, 0, recv);
+
+					client.Send(Encoding.ASCII.GetBytes("accept"));
 				}
 				string disconnectMsg = "Disconnected from " + clientep.Address;
 				Console.WriteLine(disconnectMsg);
