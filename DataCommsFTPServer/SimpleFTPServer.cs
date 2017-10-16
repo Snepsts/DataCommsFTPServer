@@ -46,72 +46,55 @@ class SimpleFTPServer
 		server.Listen(10);
 
 		string path = "C:\\Users\\Public\\";
-
-		DateTime currTime = DateTime.Now;
-		string genMessage = "SimpleEchoServer log generated at: " + currTime + Environment.NewLine;
-		//System.IO.StreamWriter log = new System.IO.StreamWriter(@"C:\Users\Public\EchoServerLog.txt"); did not work, but for some reason the using statement does
-		using (System.IO.StreamWriter log = new System.IO.StreamWriter(@"C:\Users\Public\EchoServerLog.txt"))
+		for (; ; )
 		{
-			log.WriteLine(genMessage);
-			log.WriteLine(Environment.NewLine); //one more line to make it clear that the log starts below here
-
-			for (; ; )
+			Console.WriteLine("Do you need to shut down server? Yes or No");
+			string choice = Console.ReadLine();
+			if (choice.Contains("Y") || choice.Contains("y"))
 			{
-				string prompt = "Do you need to shut down server? Yes or No";
-				Console.WriteLine(prompt);
-				log.WriteLine(prompt);
-				string choice = Console.ReadLine();
-				log.WriteLine(choice);
-				if (choice.Contains("Y") || choice.Contains("y"))
-				{
-					string shutdownMsg = "The server is shutting down...";
-					Console.WriteLine(shutdownMsg);
-					log.WriteLine(shutdownMsg);
-					break;
-				}
-				string waitMsg = "Waiting for a client...";
-				Console.WriteLine(waitMsg);
-				log.WriteLine(waitMsg);
-				Socket client = server.Accept();
-				IPEndPoint clientep = (IPEndPoint)client.RemoteEndPoint;
-				string connectMsg = "Connected with " + clientep.Address + " at port " + clientep.Port;
-				Console.WriteLine(connectMsg);
-				log.WriteLine(connectMsg);
-				string welcome = "Welcome to my test server";
-				data = Encoding.ASCII.GetBytes(welcome);
-				client.Send(data, data.Length, SocketFlags.None);
-
-				while (true)
-				{
-					data = new byte[1024];
-					recv = client.Receive(data);
-
-					if (recv == 0)
-						break;
-
-					string name = Encoding.ASCII.GetString(data, 0, recv);
-
-					client.Send(data, recv, SocketFlags.None);
-
-					data = new byte[102400];
-					recv = client.Receive(data);
-
-					if (recv == 0)
-						break;
-
-					string file = path + name;
-					FileStream download = new FileStream(file, FileMode.Create);
-
-					Console.WriteLine("Receiving file...");
-					download.Write(data, 0, recv);
-
-					client.Send(Encoding.ASCII.GetBytes("accept"));
-				}
-				string disconnectMsg = "Disconnected from " + clientep.Address;
-				Console.WriteLine(disconnectMsg);
-				log.WriteLine(disconnectMsg);
-				client.Close();
+				Console.WriteLine("The server is shutting down...");
+				break;
 			}
+
+			Console.WriteLine("Waiting for a client...");
+			Socket client = server.Accept();
+			IPEndPoint clientep = (IPEndPoint)client.RemoteEndPoint;
+			string connectMsg = "Connected with " + clientep.Address + " at port " + clientep.Port;
+			Console.WriteLine(connectMsg);
+
+			string welcome = "Welcome to my test server";
+			data = Encoding.ASCII.GetBytes(welcome);
+			client.Send(data, data.Length, SocketFlags.None);
+
+			while (true)
+			{
+				data = new byte[1024];
+				recv = client.Receive(data);
+
+				if (recv == 0)
+					break;
+
+				string name = Encoding.ASCII.GetString(data, 0, recv);
+
+				client.Send(data, recv, SocketFlags.None);
+
+				data = new byte[102400]; //100 KB
+				recv = client.Receive(data);
+
+				if (recv == 0)
+					break;
+
+				string file = path + name;
+				FileStream download = new FileStream(file, FileMode.Create);
+
+				Console.WriteLine("Receiving file...");
+				download.Write(data, 0, recv);
+
+				client.Send(Encoding.ASCII.GetBytes("accept"));
+			}
+
+			Console.WriteLine("Disconnected from " + clientep.Address);
+			client.Close();
 		}
 
 		server.Close();
